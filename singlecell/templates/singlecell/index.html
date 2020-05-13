@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block title %}Image{% endblock %}
+
+{% block content %}
+<div>
+    <img src="data:image/jpg;base64,{{patch_byte_str}}" />
+</div>
+{% endblock %}
