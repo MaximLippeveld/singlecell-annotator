@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Image{% endblock %}
+{% block title %}Annotating {{ dataset_name }}{% endblock %}
 
 {% block content %}
 <p class="mt-4">
@@ -11,7 +11,7 @@
     <div class="flex-1 text-center">
         <p class="mb-2">{{ name }}</p>
         {% for z_slice in channel_stack %}
-        <img class="mx-auto w-3/4 mt-2" src="data:image/jpg;base64,{{z_slice}}" />
+        <img class="mx-auto w-3/4 mt-2" src="data:image/png;base64,{{z_slice}}" />
         {% endfor %}
     </div>
     {% endfor %}
@@ -19,7 +19,7 @@
 <form action="" method="post" class="flex flex-col md:w-1/4 mt-5">
     {% csrf_token %}
     {{ form }}
-    <input class="mt-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded cursor-pointer" type="submit" value="Submit and go to next patch">
+    <input class="mt-4 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded cursor-pointer" type="submit" value="Submit and go to next patch">
 </form>
 
 {% endblock %}
