@@ -9,11 +9,19 @@ from PIL import Image
 import pandas
 import numpy
 import io
-import bioformats
-import javabridge
-import javabridge._javabridge as _jb
 import os
 import threading
+
+def read_tiff(path):
+    """
+    path - Path to the multipage-tiff file
+    """
+    with Image.open(path) as img:
+        images = []
+        for i in range(img.n_frames):
+            img.seek(i)
+            images.append(numpy.array(img))
+        return numpy.array(images)
 
 
 def get_next_image(dataset):
@@ -38,30 +46,28 @@ def get_next_image(dataset):
 
     names = ["DAPI", "eGFP (CD45)", "RPe (Siglec 8)", "APC (CD15)", "BF", "Oblique 1", "Oblique 2"]
 
-    if not _jb.get_vm().is_active() or _jb.get_env() is None:
-        javabridge.start_vm(class_path=bioformats.JARS)
+    image = read_tiff(os.path.join(dataset.path, f"series_{series}.ome.tiff"))
     
-    with bioformats.ImageReader(dataset.path) as reader:
-        for channel, name in enumerate(names):
-            z_stack = []
+    for channel, name in enumerate(names):
+        z_stack = []
 
-            for z in range(3):
-                # load image and load patch
-                z_slice = reader.read(c=channel, z=z, series=segmentation["series"])
+        for z in range(3):
+            # load image and load patch
+            z_slice = image[channel + z*len(names)]
 
-                p = process_segmentation.extract_patch_from_image(segmentation[:4], z_slice)
-                p = ((p-numpy.min(p))/(numpy.max(p)-numpy.min(p)))*255
-                p = Image.fromarray(p.astype('uint8'))
+            p = process_segmentation.extract_patch_from_image(segmentation[:4], z_slice)
+            p = ((p-numpy.min(p))/(numpy.max(p)-numpy.min(p)))*65535
+            p = Image.fromarray(p.astype('uint16'))
 
-                in_mem_file = io.BytesIO()
-                p.save(in_mem_file, format = "JPEG")
-                in_mem_file.seek(0)
+            in_mem_file = io.BytesIO()
+            p.save(in_mem_file, format = "PNG")
+            in_mem_file.seek(0)
 
-                z_stack.append(
-                    base64.b64encode(in_mem_file.read()).decode('ascii')
-                )
-            
-            patch[name] = z_stack
+            z_stack.append(
+                base64.b64encode(in_mem_file.read()).decode('ascii')
+            )
+        
+        patch[name] = z_stack
 
     return series, seg_id, patch
 
