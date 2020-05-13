@@ -3,7 +3,23 @@
 {% block title %}Image{% endblock %}
 
 {% block content %}
-<div>
-    <img src="data:image/jpg;base64,{{patch_byte_str}}" />
+<p class="mt-4">
+    Series {{ series }}, patch {{ patch_id }} from dataset {{ dataset_name }}.
+</p>
+<div class="mt-4 flex justify-between">
+    {% for name, channel_stack in patch.items %}
+    <div class="flex-1 text-center">
+        <p class="mb-2">{{ name }}</p>
+        {% for z_slice in channel_stack %}
+        <img class="mx-auto w-3/4 mt-2" src="data:image/jpg;base64,{{z_slice}}" />
+        {% endfor %}
+    </div>
+    {% endfor %}
 </div>
+<form action="" method="post" class="flex flex-col md:w-1/4 mt-5">
+    {% csrf_token %}
+    {{ form }}
+    <input class="mt-4 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded cursor-pointer" type="submit" value="Submit and go to next patch">
+</form>
+
 {% endblock %}
