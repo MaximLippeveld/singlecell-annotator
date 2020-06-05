@@ -28,6 +28,10 @@ def get_next_image(dataset):
 
     # find next unlabeled segmentation in the dataset
     segmentations = pandas.read_csv(dataset.segmentations)
+
+    # only select CD15+ cells
+    segmentations = segmentations[segmentations["CD15+"]]
+
     segmentations["labeled"] = False
 
     for a in dataset.annotation_set.all():

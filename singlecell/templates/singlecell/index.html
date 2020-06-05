@@ -4,7 +4,7 @@
 
 {% block content %}
 <p class="mt-4">
-    Series {{ series }}, patch {{ patch_id }} from dataset {{ dataset_name }}.
+    Series {{ series }}, patch {{ patch_id }} from dataset {{ dataset_name }}. Showing only CD15+ patches.
 </p>
 <div class="mt-4 flex justify-between">
     {% for name, channel_stack in patch.items %}
