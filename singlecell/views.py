@@ -27,7 +27,7 @@ def read_tiff(path):
 def get_next_image(dataset):
 
     # find next unlabeled segmentation in the dataset
-    segmentations = pandas.read_csv(dataset.segmentations)
+    segmentations = pandas.read_csv(dataset.segmentations, index_col=0)
 
     # only select CD15+ cells
     segmentations = segmentations[segmentations["CD15+"]]
