@@ -4,7 +4,7 @@ from . import models
 from . import forms
 import base64
 from django.contrib.staticfiles import finders
-from c7m import load_images, process_segmentation
+from c7m import load_tiff_images, process_segmentation
 from PIL import Image
 import pandas
 import numpy
@@ -28,9 +28,7 @@ def get_next_image(dataset):
 
     # find next unlabeled segmentation in the dataset
     segmentations = pandas.read_csv(dataset.segmentations, index_col=0)
-
-    # only select CD15+ cells
-    segmentations = segmentations[segmentations["CD15+"]]
+    sel = segmentations["CD15+"]
 
     segmentations["labeled"] = False
 
@@ -38,11 +36,11 @@ def get_next_image(dataset):
         segmentations.loc[a.seg_id, "labeled"] = True
     
     counts = {}
-    for s_idx, df in segmentations.groupby("series"):
+    for s_idx, df in segmentations[sel].groupby("series"):
         counts[s_idx] = df["labeled"].sum()
 
     series = min(counts, key=counts.get)
-    seg_id = segmentations[segmentations["series"]==series].index[0]
+    seg_id = segmentations[sel & (segmentations["series"]==series) & ~segmentations["labeled"]].index[0]
 
     segmentation = segmentations.loc[seg_id]
     
