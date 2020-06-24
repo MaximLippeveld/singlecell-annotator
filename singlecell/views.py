@@ -36,7 +36,7 @@ def get_next_image(dataset):
         segmentations.loc[a.seg_id, "labeled"] = True
     
     counts = {}
-    for s_idx, df in segmentations[sel].groupby("series"):
+    for s_idx, df in segmentations[sel & ~segmentations["labeled"]].groupby("series"):
         counts[s_idx] = df["labeled"].sum()
 
     series = min(counts, key=counts.get)
