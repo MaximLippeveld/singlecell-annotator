@@ -6,6 +6,9 @@
 <p class="mt-4">
     Series {{ series }}, patch {{ patch_id }} from dataset {{ dataset_name }}. Showing only CD15+ patches.
 </p>
+<p>
+    Already labeled {{number_labeled}} out of {{total_patches}} patches ({{percent_labeled}}%).
+</p>
 <div class="mt-4 flex justify-between">
     {% for name, channel_stack in patch.items %}
     <div class="flex-1 text-center">

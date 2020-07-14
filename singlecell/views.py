@@ -32,8 +32,12 @@ def get_next_image(dataset):
 
     segmentations["labeled"] = False
 
-    for a in dataset.annotation_set.all():
+    all_annotations = dataset.annotation_set.all()
+    for a in all_annotations:
         segmentations.loc[a.seg_id, "labeled"] = True
+
+    number_labeled = all_annotations.count()
+    total_patches = segmentations[sel].shape[0]
     
     counts = {}
     for s_idx, df in segmentations[sel & ~segmentations["labeled"]].groupby("series"):
@@ -71,7 +75,7 @@ def get_next_image(dataset):
         
         patch[name] = z_stack
 
-    return series, seg_id, patch
+    return series, seg_id, patch, number_labeled, total_patches
 
 
 
@@ -95,7 +99,7 @@ def index(request):
     dataset = models.Dataset.objects.get()
 
     # show next image
-    series, seg_id, patch = get_next_image(dataset)
+    series, seg_id, patch, number_labeled, total_patches = get_next_image(dataset)
         
     # create new form
     form = forms.AnnotationForm(initial={
@@ -108,7 +112,10 @@ def index(request):
         "form": form,
         "series": series,
         "patch_id": seg_id,
-        "dataset_name": dataset.name
+        "dataset_name": dataset.name,
+        "number_labeled": number_labeled,
+        "total_patches": total_patches,
+        "percent_labeled": "%.2f" % ((number_labeled/total_patches)*100)
     }
 
     return render(request, "singlecell/index.html", context)
