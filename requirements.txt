@@ -1,9 +1,9 @@
+c7m==0.1.2
 appdirs==1.4.4
 asgiref==3.2.7
 bleach==3.1.5
 boto3==1.13.8
 botocore==1.16.8
-c7m
 certifi==2020.4.5.1
 cffi==1.14.0
 chardet==3.0.4
@@ -27,7 +27,7 @@ keyring==21.2.1
 kiwisolver==1.2.0
 matplotlib==3.2.1
 networkx==2.4
-numpy==1.18.4
+numpy==1.15.4
 opencv-python==4.2.0.34
 packaging==20.3
 pandas==1.0.3
