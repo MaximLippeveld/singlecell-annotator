@@ -57,7 +57,7 @@ def get_next_image(dataset):
     for channel, name in enumerate(names):
         z_stack = []
 
-        for z in range(3):
+        for z in range(1):
             # load image and load patch
             z_slice = image[channel + z*len(names)]
 
