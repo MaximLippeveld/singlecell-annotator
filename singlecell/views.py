@@ -10,7 +10,7 @@ import pandas
 import numpy
 import io
 import os
-import threading
+
 
 def read_tiff(path):
     """
@@ -23,8 +23,9 @@ def read_tiff(path):
             images.append(numpy.array(img))
         return numpy.array(images)
 
+names = ["DAPI", "eGFP (CD45)", "RPe (Siglec 8)", "APC (CD15)", "BF", "Oblique 1", "Oblique 2"]
 
-def get_next_image(dataset):
+def get_next_images(dataset, n=3):
 
     # find next unlabeled segmentation in the dataset
     segmentations = pandas.read_csv(dataset.segmentations, index_col=0)
@@ -38,22 +39,33 @@ def get_next_image(dataset):
 
     number_labeled = all_annotations.count()
     total_patches = segmentations[sel].shape[0]
-    
-    counts = {}
-    for s_idx, df in segmentations[sel & ~segmentations["labeled"]].groupby("series"):
-        counts[s_idx] = df["labeled"].sum()
 
-    series = min(counts, key=counts.get)
-    seg_id = segmentations[sel & (segmentations["series"]==series) & ~segmentations["labeled"]].index[0]
+    s = segmentations[sel & ~segmentations["labeled"]].groupby("series")["labeled"].sum()
+    s = s.sort_values(ascending=False).index
 
-    segmentation = segmentations.loc[seg_id]
-    
+    series = s[:n]
+
+    seg_ids, patches = [], []
+    for serie in series:
+        seg_id = segmentations[
+            sel
+            & (segmentations["series"]==serie)
+            & ~segmentations["labeled"]
+        ].index[0]
+        seg_ids.append(seg_id)
+
+        patch = get_next_image(serie, dataset.path, segmentations.loc[seg_id])
+        patches.append(patch)
+
+    return series.values.tolist(), seg_ids, patches, number_labeled, total_patches
+
+
+def get_next_image(series, path, segmentation):
+
     patch = {}
 
-    names = ["DAPI", "eGFP (CD45)", "RPe (Siglec 8)", "APC (CD15)", "BF", "Oblique 1", "Oblique 2"]
+    image = read_tiff(os.path.join(path, f"series_{series}.ome.tiff"))
 
-    image = read_tiff(os.path.join(dataset.path, f"series_{series}.ome.tiff"))
-    
     for channel, name in enumerate(names):
         z_stack = []
 
@@ -72,46 +84,35 @@ def get_next_image(dataset):
             z_stack.append(
                 base64.b64encode(in_mem_file.read()).decode('ascii')
             )
-        
+
         patch[name] = z_stack
 
-    return series, seg_id, patch, number_labeled, total_patches
-
+    return patch
 
 
 def index(request):
 
-    form = None
+    formset = None
 
     if request.method == "POST":
         # save annotation to database
+        formset = forms.AnnotationFormSet(request.POST)
 
-        a = models.Annotation.objects.filter(
-            seg_id=request.POST["seg_id"], 
-            dataset__pk=request.POST["dataset"]
-        ).first()
-        form = forms.AnnotationForm(request.POST, instance=a)
+        if formset.is_valid():
+            formset.save()
 
-        if form.is_valid():
-            form.save()
-        
     # load the default dataset
     dataset = models.Dataset.objects.get()
 
     # show next image
-    series, seg_id, patch, number_labeled, total_patches = get_next_image(dataset)
-        
+    series, seg_ids, patches, number_labeled, total_patches = get_next_images(dataset, n=3)
+
     # create new form
-    form = forms.AnnotationForm(initial={
-        "dataset": dataset.pk,
-        "seg_id": seg_id
-    })
+    formset = forms.AnnotationFormSet()
 
     context = {
-        "patch": patch,
-        "form": form,
-        "series": series,
-        "patch_id": seg_id,
+        "formset": formset,
+        "data": zip(formset.forms, patches, series, seg_ids),
         "dataset_name": dataset.name,
         "number_labeled": number_labeled,
         "total_patches": total_patches,
