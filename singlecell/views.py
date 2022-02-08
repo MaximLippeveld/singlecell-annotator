@@ -96,7 +96,10 @@ def index(request):
 
     if request.method == "POST":
         # save annotation to database
-        formset = forms.AnnotationFormSet(request.POST)
+        formset = forms.AnnotationFormSet(
+            request.POST,
+            queryset=models.Annotation.objects.none()
+        )
 
         if formset.is_valid():
             formset.save()
@@ -108,7 +111,13 @@ def index(request):
     series, seg_ids, patches, number_labeled, total_patches = get_next_images(dataset, n=3)
 
     # create new form
-    formset = forms.AnnotationFormSet()
+    formset = forms.AnnotationFormSet(
+        initial=[
+            dict(seg_id=seg_id, dataset=dataset)
+            for seg_id in seg_ids
+        ],
+        queryset=models.Annotation.objects.none()
+    )
 
     context = {
         "formset": formset,
