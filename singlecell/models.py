@@ -26,6 +26,7 @@ class Annotation(models.Model):
         unique_together = ('dataset', 'seg_id')
 
     class LabelChoices(models.IntegerChoices):
+        NOT_SET = -1, "Not set"
         BAD_SEGMENT = 0, "Bad segmentation"
         ONELOBE = 1, "1 lobe"
         TWOLOBES = 2, "2 lobes"
@@ -38,7 +39,7 @@ class Annotation(models.Model):
         verbose_name="Label assigned in this annotation",
         name="label",
         choices=LabelChoices.choices,
-        default=LabelChoices.UNCLEAR
+        default=LabelChoices.NOT_SET
     )
     segmentation_id = models.IntegerField(
         verbose_name="Index of segmentation to which this annotation is linked",
