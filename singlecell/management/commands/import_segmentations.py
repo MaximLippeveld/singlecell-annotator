@@ -13,7 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('dataset', type=int)
         parser.add_argument('segmentations', type=str)
 
-    def handle(self, *args, segmentations, dataset):
+    def handle(self, *args, segmentations, dataset, **options):
 
         try:
             dataset = Dataset.objects.get(pk=dataset)
@@ -22,12 +22,15 @@ class Command(BaseCommand):
 
         df = pq.read_table(segmentations).to_pandas()
 
-        for idx, r in tqdm(df.itertuples(), file=self.stdout):
+        for idx, r in tqdm(df.iterrows(), file=self.stdout):
             ann = Annotation(
                 dataset=dataset,
-                segmentation_id=idx,
+                seg_id=idx,
                 scene=r.meta_scene,
                 tile=r.meta_tile,
-                bbox=",".join([r.bbox_minr, r.bbox_minc, r.bbox_maxr, r.bbox_maxc])
+                bbox=",".join(
+                    str(x)
+                    for x in
+                    [r.meta_bbox_minr, r.meta_bbox_minc, r.meta_bbox_maxr, r.meta_bbox_maxc])
             )
             ann.save()
