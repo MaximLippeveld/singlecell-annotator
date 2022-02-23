@@ -1,12 +1,13 @@
 from django import forms
 from . import models
+from django.conf import settings
 
 AnnotationFormSet = forms.modelformset_factory(
-    fields = "__all__",
+    fields = ["label", "seg_id", "dataset"],
     model = models.Annotation,
     widgets = {
         'seg_id': forms.HiddenInput(),
         'dataset': forms.HiddenInput()
     },
-    extra=3
+    max_num=settings.NUM_PER_SET
 )
