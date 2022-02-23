@@ -13,6 +13,11 @@ import pandas
 
 def get_next_images(dataset, n=3):
 
+    if dataset.indices == "":
+        channel_indices = numpy.s_[:]
+    else:
+        channel_indices = [int(x) for x in dataset.indices.split(",")]
+
     number_labeled = dataset.annotation_set.filter(
         ~models.Q(label=Annotation.LabelChoices.NOT_SET)).count()
     total_patches = dataset.annotation_set.count()
@@ -44,11 +49,13 @@ def get_next_images(dataset, n=3):
             bbox = [int(float(x)) for x in ann.bbox.split(",")]
             pixels = image.get_image_data(
                 "CZXY", T=0, M=ann.tile
-            )[:, :, bbox[0]:bbox[2], bbox[1]:bbox[3]]
+            )[channel_indices, :, bbox[0]:bbox[2], bbox[1]:bbox[3]]
             pixels = numpy.max(pixels, axis=1)
 
             patch = {}
             for name, channel in zip(dataset.channel_names.split(","), pixels):
+                channel = (channel - channel.min()) / (channel.max() - channel.min())
+                channel *= numpy.iinfo("uint16").max
                 channel = Image.fromarray(channel.astype('uint16'))
                 in_mem_file = io.BytesIO()
                 channel.save(in_mem_file, format = "PNG")

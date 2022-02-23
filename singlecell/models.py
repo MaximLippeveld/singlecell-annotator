@@ -15,6 +15,13 @@ class Dataset(models.Model):
         name="channel_names",
         max_length=255
     )
+    channel_indices = models.CharField(
+        verbose_name="Comma-separated list of channel indices",
+        name="indices",
+        max_length=255,
+        validators=[int_list_validator],
+        default=""
+    )
 
     def __str__(self):
         return self.name
@@ -36,7 +43,7 @@ class Annotation(models.Model):
 
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
     label = models.IntegerField(
-        verbose_name="Label assigned in this annotation",
+        verbose_name="Label",
         name="label",
         choices=LabelChoices.choices,
         default=LabelChoices.NOT_SET
