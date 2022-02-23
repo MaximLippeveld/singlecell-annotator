@@ -1,4 +1,3 @@
-import click
 import pyarrow.parquet as pq
 
 from singlecell.models import Annotation, Dataset
