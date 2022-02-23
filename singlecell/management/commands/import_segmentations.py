@@ -12,8 +12,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument('dataset', type=int)
         parser.add_argument('segmentations', type=str)
+        parser.add_argument('--limit', type=int, default=-1)
 
-    def handle(self, *args, segmentations, dataset, **options):
+    def handle(self, *args, segmentations, dataset, limit, **options):
 
         try:
             dataset = Dataset.objects.get(pk=dataset)
@@ -22,7 +23,10 @@ class Command(BaseCommand):
 
         df = pq.read_table(segmentations).to_pandas()
 
-        for idx, r in tqdm(df.iterrows(), file=self.stdout):
+        if limit > 0:
+            df = df.sample(n=limit)
+
+        for idx, r in tqdm(df.iterrows(), file=self.stdout, total=len(df)):
             ann = Annotation(
                 dataset=dataset,
                 seg_id=idx,
