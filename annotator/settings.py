@@ -25,7 +25,7 @@ SECRET_KEY = '8ex1spmt%_#n!w_rib8krt3ez3^8fr@=&b)e6&42&$an+)g8#v'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['dev.maximl.be', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['dev.maximl.be', 'localhost', '127.0.0.1', '193.190.80.30']
 
 
 # Application definition
@@ -87,7 +87,7 @@ WSGI_APPLICATION = 'annotator.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join('/mnt', 'db.sqlite3'),
     }
 }
 
@@ -129,5 +129,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 NUM_PER_SET=5
