@@ -13,20 +13,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '8ex1spmt%_#n!w_rib8krt3ez3^8fr@=&b)e6&42&$an+)g8#v'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['dev.maximl.be', 'localhost', '127.0.0.1', '193.190.80.30']
-
 
 # Application definition
 
@@ -79,17 +70,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'annotator.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('/mnt', 'db.sqlite3'),
-    }
-}
 
 
 # Password validation
