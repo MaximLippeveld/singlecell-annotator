@@ -7,7 +7,8 @@ AnnotationFormSet = forms.modelformset_factory(
     model = models.Annotation,
     widgets = {
         'seg_id': forms.HiddenInput(),
-        'dataset': forms.HiddenInput()
+        'dataset': forms.HiddenInput(),
+        'label': forms.RadioSelect()
     },
     max_num=settings.NUM_PER_SET
 )
