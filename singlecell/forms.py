@@ -2,13 +2,12 @@ from django import forms
 from . import models
 from django.conf import settings
 
-AnnotationFormSet = forms.modelformset_factory(
-    fields = ["label", "seg_id", "dataset"],
-    model = models.Annotation,
-    widgets = {
-        'seg_id': forms.HiddenInput(),
-        'dataset': forms.HiddenInput(),
-        'label': forms.RadioSelect()
+LabelFormSet = forms.modelformset_factory(
+    fields = ["label", "annotation"],
+    model=models.Label,
+    widgets={
+        "label": forms.RadioSelect(),
+        "annotation": forms.HiddenInput()
     },
     max_num=settings.NUM_PER_SET
 )

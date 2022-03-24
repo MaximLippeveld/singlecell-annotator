@@ -32,22 +32,8 @@ class Annotation(models.Model):
     class Meta:
         unique_together = ('dataset', 'seg_id')
 
-    class LabelChoices(models.IntegerChoices):
-        NOT_SET = -1, "Not set"
-        BAD_SEGMENT = 0, "Bad segmentation"
-        ONELOBE = 1, "1 lobe"
-        TWOLOBES = 2, "2 lobes"
-        THREELOBES = 3, "3 lobes"
-        FOURLOBES = 4, "4 lobes"
-        UNCLEAR = 5, "Unclear amount of lobes"
 
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE)
-    label = models.IntegerField(
-        verbose_name="Label",
-        name="label",
-        choices=LabelChoices.choices,
-        default=LabelChoices.NOT_SET
-    )
     segmentation_id = models.IntegerField(
         verbose_name="Index of segmentation to which this annotation is linked",
         name="seg_id"
@@ -70,3 +56,22 @@ class Annotation(models.Model):
 
     def __str__(self):
         return f"Annotation for segmentation {self.seg_id} in {self.dataset.name}"
+
+
+class Label(models.Model):
+
+    class Choices(models.IntegerChoices):
+        BAD_SEGMENT = 0, "Bad segmentation"
+        ONELOBE = 1, "1 lobe"
+        TWOLOBES = 2, "2 lobes"
+        THREELOBES = 3, "3 lobes"
+        FOURLOBES = 4, "4 lobes"
+        FIVELOBES = 5, "5 lobes",
+        UNCLEAR = 6, "Unclear amount of lobes"
+
+    label = models.IntegerField(
+        verbose_name="Label",
+        name="label",
+        choices=Choices.choices,
+    )
+    annotation = models.ForeignKey(Annotation, on_delete=models.CASCADE)

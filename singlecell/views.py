@@ -5,7 +5,7 @@ import base64
 from PIL import Image
 import numpy
 import io
-from singlecell.models import Annotation, Dataset
+from singlecell.models import Label, Dataset
 from singlecell import forms
 from aicsimageio import AICSImage
 import pandas
@@ -18,22 +18,26 @@ def get_next_images(dataset, n=3):
     else:
         channel_indices = [int(x) for x in dataset.indices.split(",")]
 
-    number_labeled = dataset.annotation_set.filter(
-        ~models.Q(label=Annotation.LabelChoices.NOT_SET)).count()
     total_patches = dataset.annotation_set.count()
-    annotations = dataset.annotation_set.filter(label=Annotation.LabelChoices.NOT_SET)
 
-    scenes = annotations.values("scene").annotate(total=models.Count("scene")).order_by("total")
+    annotations = dataset.annotation_set.annotate(models.Count("label"))
+    number_labeled = annotations.filter(label__count__gt=0).count()
+    empty_annotations = annotations.filter(label__count=0)
+
+    scenes, counts = numpy.unique(
+        [v["scene"] for v in empty_annotations.values("scene")], return_counts=True)
+
     selected_scenes = []
-    i = 0
-    n2 = n
-    while(n2 > 0):
-        c = annotations.filter(scene=scenes[i]["scene"]).count()
-        if c > 0:
-            selected_scenes.append(scenes[i]["scene"])
-            n2 -= c
+    random_idx = numpy.random.choice(len(scenes), size=len(scenes), replace=False)
+    t = 0
+    for c in random_idx:
+        t += counts[c]
+        selected_scenes.append(scenes[c])
+        if t > n:
+            break
 
-    selected_annotations = annotations.filter(scene__in=selected_scenes).order_by("seg_id")[:n]
+    selected_annotations = empty_annotations.filter(
+        scene__in=selected_scenes).order_by("seg_id")[:n]
 
     # for performance reasons data has to be loaded per scene
     patches = []
@@ -74,7 +78,7 @@ def index(request):
 
     if request.method == "POST":
         # save annotation to database
-        formset = forms.AnnotationFormSet(
+        formset = forms.LabelFormSet(
             request.POST
         )
 
@@ -87,8 +91,11 @@ def index(request):
         dataset, n=settings.NUM_PER_SET)
 
     # create new form
-    formset = forms.AnnotationFormSet(
-        queryset=selected_annotations
+    formset = forms.LabelFormSet(initial=[
+        {'annotation': annotation}
+        for annotation in selected_annotations
+    ],
+        queryset=Label.objects.none()
     )
 
     context = {

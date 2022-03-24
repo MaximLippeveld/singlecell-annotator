@@ -29,7 +29,9 @@
                 </div>
                 <div class="flex flex-row">
                     {% for radio in form.label %}
-                    <label class="w-1/4 p-2 ml-2 first:ml-0 bg-gray-300 focus:bg-gray-600" for="{{ radio.id_for_label }}">
+                    <label
+                    class="p-2 ml-2 first:ml-0 bg-gray-300 focus:bg-gray-600 cursor-pointer"
+                    for="{{ radio.id_for_label }}">
                         {{ radio.tag }}
                         {{ radio.choice_label }}
                     </label>
