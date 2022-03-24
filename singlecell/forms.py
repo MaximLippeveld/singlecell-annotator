@@ -9,5 +9,5 @@ LabelFormSet = forms.modelformset_factory(
         "label": forms.RadioSelect(),
         "annotation": forms.HiddenInput()
     },
-    max_num=settings.NUM_PER_SET
+    extra=settings.NUM_PER_SET
 )
