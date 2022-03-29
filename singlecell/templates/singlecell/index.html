@@ -9,14 +9,26 @@
 <form action="" method="post" class="flex flex-col justify-items-stretch mt-5">
     {% csrf_token %}
     {{ formset.management_form }}
-    {% for form, patch in data %}
-        <div class="mt-4 flex justify-between">
+    {% for form, patch, stack in data %}
+        <div
+            class="flex flex-col cursor-pointer"
+            x-data="{open: false}"
+            x-on:click="open = !open">
+            <div class="mt-4 flex flex-row justify-between">
             {% for name, channel in patch.items %}
-            <div class="flex-1 text-center">
-                <p class="mb-2">{{ name }}</p>
-                <img class="mx-auto w-3/4 mt-2" src="data:image/png;base64,{{channel}}" />
-            </div>
+                <div class="flex-1 text-center">
+                    <p class="mb-2">{{ name }}</p>
+                    <img class="mx-auto w-3/4 mt-2" src="data:image/png;base64,{{channel}}" />
+                    {% if name == "DAPI" %}
+                        <div x-show="open" class="flex flex-col">
+                        {% for plane in stack %}
+                            <img class="mx-auto w-3/4 mt-2" src="data:image/png;base64,{{plane}}" />
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
             {% endfor %}
+            </div>
         </div>
         <div class="mt-3">
             {% for hidden in form.hidden_fields %}

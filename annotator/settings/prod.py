@@ -16,3 +16,5 @@ DATABASES = {
         'NAME': os.path.join('/mnt', 'db.sqlite3'),
     }
 }
+
+NUM_PER_SET = 10

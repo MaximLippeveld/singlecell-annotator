@@ -41,6 +41,7 @@ def get_next_images(dataset, n=3):
 
     # for performance reasons data has to be loaded per scene
     patches = []
+    stacks = []
     df = pandas.DataFrame(selected_annotations.values())
     for scene, a in df.groupby("scene"):
         if len(a) == 0:
@@ -51,10 +52,13 @@ def get_next_images(dataset, n=3):
 
         for _, ann in a.iterrows():
             bbox = [int(float(x)) for x in ann.bbox.split(",")]
-            pixels = image.get_image_data(
+            tmp = image.get_image_data(
                 "CZXY", T=0, M=ann.tile
             )[channel_indices, :, bbox[0]:bbox[2], bbox[1]:bbox[3]]
-            pixels = numpy.max(pixels, axis=1)
+
+            pixels = numpy.empty(shape=(tmp.shape[0], tmp.shape[2], tmp.shape[3]), dtype=tmp.dtype)
+            pixels[0] = tmp[0, 0]
+            pixels[1:] = numpy.max(tmp[1:], axis=1)
 
             patch = {}
             for name, channel in zip(dataset.channel_names.split(","), pixels):
@@ -67,9 +71,21 @@ def get_next_images(dataset, n=3):
 
                 patch[name] = base64.b64encode(in_mem_file.read()).decode('ascii')
 
-            patches.append(patch)
+            stack = []
+            for plane in tmp[0, 1:]:
+                plane = (plane - plane.min()) / (plane.max() - plane.min())
+                plane *= numpy.iinfo("uint16").max
+                plane = Image.fromarray(plane.astype('uint16'))
+                in_mem_file = io.BytesIO()
+                plane.save(in_mem_file, format = "PNG")
+                in_mem_file.seek(0)
 
-    return selected_annotations, patches, number_labeled, total_patches
+                stack.append(base64.b64encode(in_mem_file.read()).decode('ascii'))
+
+            patches.append(patch)
+            stacks.append(stack)
+
+    return selected_annotations, patches, stacks, number_labeled, total_patches
 
 
 def index(request):
@@ -87,7 +103,7 @@ def index(request):
 
     dataset = Dataset.objects.get()
 
-    selected_annotations, patches, number_labeled, total_patches = get_next_images(
+    selected_annotations, patches, stacks, number_labeled, total_patches = get_next_images(
         dataset, n=settings.NUM_PER_SET)
 
     # create new form
@@ -100,7 +116,7 @@ def index(request):
 
     context = {
         "formset": formset,
-        "data": zip(formset.forms, patches),
+        "data": zip(formset.forms, patches, stacks),
         "dataset_name": dataset.name,
         "number_labeled": number_labeled,
         "total_patches": total_patches,

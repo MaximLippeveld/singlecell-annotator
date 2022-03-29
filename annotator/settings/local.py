@@ -18,3 +18,5 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+NUM_PER_SET = 5
