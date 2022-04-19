@@ -23,7 +23,7 @@ class Command(BaseCommand):
         if path is None:
             path = Path("annotations_dataset%d_%s.csv" % (
                 dataset.pk,
-                datetime.now().strftime("%m%d%Y%H%M")
+                datetime.now().strftime("%d%m%Y%H%M")
             ))
 
         df = pandas.DataFrame(
