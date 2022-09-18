@@ -15,13 +15,49 @@ The app is built using Django and TailwindCSS.
 
 # Installation
 
-Clone the directory and install using pip.
+Download the repository tarball, untar, navigate in the directory and install using pip.
 ```
-git clone git@github.com:MaximLippeveld/singlecell-annotator.git
+wget https://github.com/MaximLippeveld/singlecell-annotator/tarball/main -o main.tgz
+tar xzf main.tgz
+cd MaximLippeveld-singlecell-annotator*
 pip install .
 ```
 
 # Usage
+
+## Serving the app
+
+Set the environment variable `DJANGO_SETTINGS_MODULE` to
+`annotator.settings.local` when developing, and to `annotator.settings.prod` when serving
+the app publicly. In the latter case, you must also set the `DJANGO_SECRET_KEY` environment
+variable to a random string.
+
+There are two options to serve the webapp:
+* Using the Django built-in development server
+```
+python manage.py runserver
+```
+This runs the app at port 8000 on the localhost.
+* or, using `gunicorn`
+```
+gunicorn \
+  --access-logfile - \
+  --workers 3 \
+  --env DJANGO_SETTINGS_MODULE=annotator.settings.prod \
+  --env DJANGO_SECRET_KEY=secret_key \
+  --bind unix:/run/gunicorn.sock \
+  annotator.wsgi:application
+```
+This runs the app at the /run/gunicorn.sock socket, which can be served using a reverse proxy
+like `nginx`.
+
+Make sure the current working directory is set to where you untarred the repository
+when launching these commands.
+
+Set NUM_PER_SET in [production](annotator/settings/prod.py) or [local](annotator/settings/local.py)
+settings to define the number of cells shown per page load.
+
+## Managment functions
 
 Import segmentations from Pandas dataframe:
 ```
