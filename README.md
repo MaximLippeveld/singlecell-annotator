@@ -15,6 +15,12 @@ The app is built using Django and TailwindCSS.
 
 # Installation
 
+Clone the directory and install using pip.
+```
+git clone git@github.com:MaximLippeveld/singlecell-annotator.git
+pip install .
+```
+
 # Usage
 
 Import segmentations from Pandas dataframe:

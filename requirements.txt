@@ -1,8 +1,0 @@
-tqdm
-Django
-Pillow
-django-tailwind
-pyarrow
-pandas
-aicsimageio
-aicspylibczi
