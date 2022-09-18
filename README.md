@@ -1,5 +1,7 @@
 # Single-cell annotator
 
+![Annotation demo](annotation_demo.gif)
+
 Single-cell anntator is a web app for manually annotating images of single-cells. It presents
 the user with a number of randomly selected unlabaled cells in an easy-to-use interface.
 
