@@ -1,0 +1,9 @@
+services:
+  annotator:
+    build: .
+    volumes:
+      - ${DB}:/app/db:rw
+      - ${DATA}:/data:ro
+    command: "runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
