@@ -57,7 +57,7 @@ when launching these commands.
 Set NUM_PER_SET in [production](annotator/settings/prod.py) or [local](annotator/settings/local.py)
 settings to define the number of cells shown per page load.
 
-## Managment functions
+## Managment commands
 
 Import segmentations from Pandas dataframe:
 ```
@@ -76,3 +76,28 @@ Export annotations to CSV using the following commands:
 python manage.py {dataset_id} --path output.csv
 ```
 Replace `{dataset_id}` with the dataset's primary key.
+
+## Docker
+
+To run the app set
+the `DATA` environment variable to the root directory containing the
+image file to be annotated, and the `DB` variable to the root directory
+containing the `sqlite` database or where it should be created.
+
+Then, in the repo directory, run
+```
+docker-compose up
+```
+
+The app is served on `localhost:8000`.
+
+The management commands can also be used from the docker image.
+Either use the image built by `docker-compose` or run
+```
+docker build .
+```
+Then run the command by running
+```
+docker run singlecell-annotator [command]
+```
+Replacing `[command]` with the management command you want to execute.
